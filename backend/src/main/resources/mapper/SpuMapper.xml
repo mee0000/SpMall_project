@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.spmall.mapper.SpuInfoMapper">
+    <insert id="insertSpuInfo" parameterType="com.example.spmall.pojo.SpuInfo">
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            select last_insert_id()
+        </selectKey>
+        insert into spu_info ( spu_name, description,price, category2_id) values (#{spuName},#{description},#{price},#{category2Id})
+    </insert>
+    <select id="getSpuInfo" parameterType="com.example.spmall.pojo.SpuInfo">
+        select id, spu_name, description,price, category2_id
+        from spu_info
+        <where>
+            <if test="category2Id != null and category2Id != ''">
+                category2_id = #{category2Id}
+            </if>
+<!--            <if test="keyword != null and keyword != ''">-->
+<!--                and spu_name like concat('%',#{name},'%')-->
+<!--            </if>-->
+        </where>
+    </select>
+    <select id="getProductList" parameterType="map">
+        select product.*
+        from
+           (select spu.spu_name,spu.price, sku.sku_name, sku.id,sku.category2_id,sku.sku_default_img,sku.quantity,sku.create_time,sku.status,sku.discount,sku.decoration
+            from spu_info spu right join sku_info sku on spu.id = sku.spu_id) as product
+        <where>
+            <if test="category2Id != null and category2Id != ''">
+                product.category2_id = #{category2Id}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                and spu_name like concat('%',#{name},'%')
+            </if>
+        </where>
+    </select>
+    <select id="getSpuBySpuId" parameterType="com.example.spmall.pojo.SpuInfo" resultMap="spuInfoMap">
+        select id, spu_name, description, category2_id, price
+        from spu_info
+        where id = #{spuId}
+    </select>
+    <select id="getSpuImageList" resultType="com.example.spmall.pojo.SpuImage">
+        select id, spu_id, img_url, img_name
+        from spu_image
+        where spu_id = #{id}
+    </select>
+    <update id="saveSpuInfo" parameterType="com.example.spmall.pojo.SpuInfo">
+        update spu_info
+        <set>
+            <if test="spuName != null and spuName != ''" >
+                spu_name = #{spuName},
+            </if>
+            <if test="description != null and description != ''" >
+                description = #{description},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+    <select id="getAttrInfo" resultMap="baseAttrMap">
+        select c1.id, c1.attr_name,c1.category_id,c1.category_level
+        from base_attr_info c1
+        where c1.category_id = #{category2Id}
+    </select>
+    <select id="selectAttrValueByAttrId" resultType="com.example.spmall.pojo.BaseAttrValue">
+        select c2.id, c2.attr_id, c2.value_name
+        from base_attr_value c2
+        where c2.attr_id = #{id}
+    </select>
+    <!-- baseAttr-->
+    <insert id="insertAttrInfo" parameterType="com.example.spmall.pojo.BaseAttrInfo">
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            select last_insert_id()
+        </selectKey>
+        insert into base_attr_info(attr_name, category_id) values(#{attrName}, #{categoryId})
+    </insert>
+    <insert id="insertRPermission" parameterType="com.example.spmall.pojo.RPermission">
+        insert into r_permission (r_id, p_id, p_name, type, code, level)
+        values(#{rId}, #{pId}, #{pName}, #{type}, #{code}, #{level})
+        on duplicate key update p_name = #{pName}, type = #{type}, code= #{code}
+    </insert>
+    <!--value 한개및 여러개 insert-->
+    <insert id="insertOneAttrValue" parameterType="com.example.spmall.pojo.BaseAttrValue">
+        insert into base_attr_value (attr_id, value_name)
+        values (#{attrId}, #{valueName})
+        on duplicate key update value_name = #{valueName}
+    </insert>
+    <insert id="insertAttrValues" parameterType="list">
+       insert into base_attr_value (attr_id, value_name) values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.attrId}, #{item.valueName})
+        </foreach>
+    </insert>
+    <delete id="deleteAttrValues" parameterType="map">
+        delete from base_attr_value
+        <where>
+            attr_id = #{attrId} and value_name not in
+            <foreach collection="values" item="item" index="index" open="(" separator="," close=")" >
+                #{item}
+            </foreach>
+        </where>
+    </delete>
+    <delete id="deleteSpuSaleAttrList" parameterType="list">
+        delete from spu_sale_attr
+        where
+        <foreach collection="list" item="item" index="index" open="" close="" separator="AND" >
+            (id != #{item.id} AND spu_id = #{item.spuId})
+        </foreach>
+    </delete>
+    <delete id="deleteSpuSaleAttrValueList" parameterType="list">
+        delete from spu_sale_attr_value
+        where
+        <foreach collection="list" item="item" index="index" open="" close="" separator="AND" >
+            (id != #{item.id} AND spu_sale_attr_id = #{item.spuSaleAttrId})
+        </foreach>
+    </delete>
+    <!-- spuSaleAttr 및 spuSaleAttrValue  -->
+    <!-- baseAttr-->
+    <insert id="insertSpuSaleAttrValue" parameterType="com.example.spmall.pojo.SpuSaleAttrValue">
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            select last_insert_id()
+        </selectKey>
+         insert into spu_sale_attr_value (spu_id, spu_sale_attr_id, spu_attr_value_name)
+         values (#{spuId}, #{spuSaleAttrId}, #{spuAttrValueName})
+    </insert>
+    <insert id="insertSpuSaleAttr" parameterType="com.example.spmall.pojo.SpuSaleAttr">
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            select last_insert_id()
+        </selectKey>
+        insert into spu_sale_attr(spu_id, base_attr_id, base_attr_name) values(#{spuId}, #{baseAttrId}, #{baseAttrName})
+    </insert>
+    <insert id="insertSpuSaleAttrValueList" parameterType="list">
+        insert into spu_sale_attr_value
+        (spu_id, spu_sale_attr_id, spu_attr_value_name)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.spuId},#{item.spuSaleAttrId},#{item.spuAttrValueName})
+        </foreach>
+
+    </insert>
+    <select id="getSpuSaleAttrListBySpuId" resultMap="spuInfoMap">
+        select s1.id, s1.spu_name, s1.description, s1.category2_id,s1.price
+        from spu_info s1
+        where s1.id = #{spuId}
+    </select>
+    <select id="getSpuSaleAttrList" resultMap="SpuSaleAttrMap">
+        select s2.id, s2.base_attr_id, s2.base_attr_name,s2.spu_id
+        from spu_sale_attr s2
+        where s2.spu_id = #{id}
+    </select>
+    <select id="getSpuSaleAttrValueList" resultType="com.example.spmall.pojo.SpuSaleAttrValue">
+        select s3.id, s3.spu_id, s3.spu_sale_attr_id, s3.spu_attr_value_name
+        from spu_sale_attr_value s3
+        where s3.spu_sale_attr_id = #{id}
+    </select>
+
+    <resultMap id="baseAttrMap" type="com.example.spmall.pojo.BaseAttrInfo">
+        <result column="id" property="id"></result>
+        <result column="attr_name" property="attrName"></result>
+        <result column="category_id" property="categoryId"></result>
+        <result column="category_level" property="categoryLevel"></result>
+        <collection property="attrValueList" ofType="com.example.spmall.pojo.BaseAttrValue" column="id" select="selectAttrValueByAttrId"></collection>
+    </resultMap>
+    <resultMap id="baseAttrValueMap" type="com.example.spmall.pojo.BaseAttrValue">
+        <result column="id" property="id"></result>
+        <result column="attr_id" property="attrId"></result>
+        <result column="value_name" property="valueName"></result>
+    </resultMap>
+    <resultMap id="spuInfoMap" type="com.example.spmall.pojo.SpuInfo">
+        <result column="id" property="id"></result>
+        <result column="spu_name" property="spuName"></result>
+        <result column="description" property="description"></result>
+        <result column="category2_id" property="category2Id"></result>
+        <result column="price" property="price"></result>
+        <collection property="spuSaleAttrList" ofType="com.example.spmall.pojo.SpuSaleAttr" column="id" select="getSpuSaleAttrList"></collection>
+        <collection property="spuImageList" ofType="com.example.spmall.pojo.SpuImage" column="id" select="getSpuImageList"></collection>
+    </resultMap>
+    <resultMap id="SpuSaleAttrMap" type="com.example.spmall.pojo.SpuSaleAttr">
+        <result column="id" property="id"></result>
+        <result column="spu_id" property="spuId"></result>
+        <result column="base_attr_id" property="baseAttrId"></result>
+        <result column="base_attr_name" property="baseAttrName"></result>
+        <collection property="spuSaleAttrValueList" ofType="com.example.spmall.pojo.SpuSaleAttrValue" column="id" select="getSpuSaleAttrValueList"></collection>
+    </resultMap>
+
+
+
+</mapper>

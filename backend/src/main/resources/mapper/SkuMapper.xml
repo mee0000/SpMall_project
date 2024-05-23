@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.spmall.mapper.SkuInfoMapper">
+    <insert id="insertSkuInfo" parameterType="com.example.spmall.pojo.SkuInfo">
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            select last_insert_id()
+        </selectKey>
+        insert into sku_info (spu_id, price,spu_name, sku_name, category2_id, quantity, discount, create_time,sku_default_img, decoration)
+             values( #{spuId}, #{price}, #{spuName}, #{skuName}, #{category2Id}, #{quantity}, #{discount}, #{createTime}, #{skuDefaultImg}, #{decoration} )
+    </insert>
+    <insert id="insertSkuAttrList" parameterType="list">
+        insert
+        into sku_attr (sku_id, attr_id, value_id) values
+            <foreach collection="list" item="item" separator="," >
+                (#{item.skuId}, #{item.attrId}, #{item.valueId})
+            </foreach>
+    </insert>
+    <insert id="insertSkuSaleAttrList" parameterType="list">
+        insert
+        into sku_sale_attr(sku_id, sale_attr_id, sale_value_id) values
+        <foreach collection="list" item="item" separator="," >
+            (#{item.skuId}, #{item.saleAttrId}, #{item.saleValueId})
+        </foreach>
+    </insert>
+    <insert id="insertSkuSaleAttr" parameterType="com.example.spmall.pojo.SkuSaleAttr">
+        insert
+        into  sku_sale_attr (sku_id, sale_attr_id, sale_value_id)
+              values (#{skuId}, #{saleAttrId}, #{saleValueId})
+        on duplicate key update sale_value_id = #{saleValueId}
+    </insert>
+    <insert id="insertSkuAttr" parameterType="com.example.spmall.pojo.SkuAttr">
+        insert
+        into sku_attr (sku_id, attr_id, value_id)
+              values (#{skuId},#{attrId},#{valueId})
+        on duplicate key update value_id = #{valueId}
+    </insert>
+    <!-- skuInfo update-->
+    <update id="updateSkuInfo" parameterType="com.example.spmall.pojo.SkuInfo">
+      update sku_info set
+        <if test="decoration != null and decoration != ''">
+            decoration = #{decoration},
+        </if>
+        <if test="skuName != null and skuName != ''">
+            sku_name = #{skuName},
+        </if>
+        <if test="quantity != null and quantity != ''">
+            quantity = #{quantity},
+        </if>
+        <if test="discount != null and discount != ''">
+            discount = #{discount},
+        </if>
+        <if test="skuDefaultImg != null and skuDefaultImg != ''">
+            sku_default_img = #{skuDefaultImg}
+        </if>
+      where id = #{id}
+    </update>
+    <!--  admin -->
+    <select id="getAllSkuInfo" parameterType="map" resultMap="skuInfoMap">
+        select id, spu_id,spu_name,price,sku_default_img,sku_name, category2_id, quantity, create_time, update_time, discount,decoration, status, price * (100-discount)/100 as goods_price_min
+        from sku_info
+        <where>
+            <if test="category2Id !=null and category2Id != ''">
+                category2_id = #{category2Id}
+            </if>
+            <if test="keyword !=null and keyword != ''">
+               and spu_name like concat('%',#{keyword},'%')
+            </if>
+            <if test="min !=null and max !=null and min !='' and max != ''">
+               and price between #{min} and #{max}
+            </if>
+        </where>
+    </select>
+    <select id="getSaleSkuInfo" parameterType="map" resultMap="skuInfoMap">
+        select id, spu_id,spu_name,price,sku_default_img,sku_name, category2_id, quantity, create_time, update_time, discount,decoration, status, price * (100-discount)/100 as goods_price_min
+        from sku_info
+        <where>
+            discount > 0
+            <if test="category2Id !=null and category2Id != ''">
+                and category2_id = #{category2Id}
+            </if>
+            <if test="keyword !=null and keyword != ''">
+                and spu_name like concat('%',#{keyword},'%')
+            </if>
+            <if test="min !=null and max !=null and min !='' and max != ''">
+                and price between #{min} and #{max}
+            </if>
+        </where>
+        <if test="sort == 0">
+            order by spu_id
+        </if>
+        <if test="sort == 1">
+          order by goods_price_min asc
+        </if>
+        <if test="sort == 2">
+            order by goods_price_min desc
+        </if>
+        <if test="sort == 3">
+            order by discount desc
+        </if>
+    </select>
+    <select id="getSkuInfoList" parameterType="int" resultMap="skuInfoMap">
+        select s1.id,s1.price,s1.spu_name, s1.spu_id,s1.sku_default_img, s1.sku_name, s1.category2_id, s1.quantity, s1.create_time, s1.update_time, s1.discount,s1.decoration,s1.status,s1.price * (100-s1.discount)/100 as goods_price_min
+        from sku_info s1
+        where s1.spu_id = #{spuId}
+    </select>
+    <select id="getOneSkuInfo" parameterType="int" resultMap="skuInfoMap">
+        select s1.id,s1.price,s1.spu_name, s1.spu_id,s1.sku_default_img, s1.sku_name,
+               s1.category2_id, s1.quantity, s1.create_time, s1.update_time,
+               s1.discount,s1.decoration,s1.status,
+               s1.price * (100-s1.discount)/100 as goods_price_min
+        from sku_info s1
+        where s1.id = #{skuId}
+    </select>
+    <select id="getSkuSaleAttrValueList" resultType="com.example.spmall.pojo.SkuSaleAttr">
+        select s.*, bai.base_attr_name as sale_attr_name, ss.spu_attr_value_name as sale_attr_value_name
+        from sku_sale_attr s join spu_sale_attr_value ss on s.sale_value_id = ss.id
+        join spu_sale_attr bai on s.sale_attr_id = bai.id
+        where s.sku_id = #{id};
+    </select>
+    <select id="getSkuAttrValList" resultType="com.example.spmall.pojo.SkuAttr">
+        select s.id, s.sku_id, s.attr_id, s.value_id, bav.value_name as value_name, bai.attr_name as attr_name
+        from sku_attr s join base_attr_value bav on s.value_id = bav.id
+                        join base_attr_info bai on s.attr_id = bai.id
+        where s.sku_id = #{id}
+    </select>
+    <resultMap id="skuInfoMap" type="com.example.spmall.pojo.SkuInfo">
+      <result column="id" property="id"></result>
+      <result column="spu_id" property="spuId"></result>
+      <result column="sku_name" property="skuName"></result>
+      <result column="spu_name" property="spuName"></result>
+      <result column="price" property="price"></result>
+      <result column="goods_price_min" property="goods_price_min"></result>
+      <result column="category2_id" property="category2Id"></result>
+      <result column="quantity" property="quantity"></result>
+      <result column="discount" property="discount"></result>
+      <result column="status" property="status"></result>
+      <result column="decoration" property="decoration"></result>
+      <result column="sku_default_img" property="skuDefaultImg"></result>
+      <result column="create_time" property="createTime"></result>
+      <result column="update_time" property="updateTime"></result>
+        <collection property="skuAttrValueList" ofType="com.example.spmall.pojo.SkuAttr" column="id" select="getSkuAttrValList"></collection>
+        <collection property="skuSaleAttrValueList" ofType="com.example.spmall.pojo.SkuSaleAttr" column="id" select="getSkuSaleAttrValueList"></collection>
+    </resultMap>
+</mapper>

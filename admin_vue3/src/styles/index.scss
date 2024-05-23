@@ -1,0 +1,16 @@
+// import reset.scss
+@import './reset.scss';
+
+// 스크롤 외각 
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    background: $base-menu-background;
+}
+
+::-webkit-slider-thumb{
+    width: 10px;
+    background-color: yellowgreen;
+    border-radius: 10px;
+}

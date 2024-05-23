@@ -1,0 +1,1 @@
+import{d as s,u as n,D as o,o as t,f as a,m as r,t as u,h as l}from"./index-06005ebc.js";const d=s({__name:"index",setup(c){let e=n();return o(()=>{e.userInfo()}),(m,p)=>(t(),a("div",null,[r("h1",null," Welcom "+u(l(e).username),1)]))}});export{d as default};

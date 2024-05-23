@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.spmall.mapper.CartMapper">
+   <insert id="insertCartAndUpdate" parameterType="com.example.spmall.pojo.Cart">
+       insert into cart (user_id, sku_id,create_date,qty)
+       values(#{userId},#{skuId},#{createDate}, #{qty})
+       on duplicate key update qty = qty + #{qty}
+   </insert>
+
+    <select id="getCartListByUserId" parameterType="int" resultMap="cartMap">
+        select id, user_id, sku_id, create_date,qty
+        from cart
+        where user_id = #{userId}
+    </select>
+    <select id="getOrderListByCartIds" resultType="com.example.spmall.pojo.Cart">
+        select id, user_id, sku_id, create_date,qty
+        from cart
+        <where>
+            id in
+            <foreach collection="array" item="item" index="index" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </where>
+    </select>
+    <delete id="deleteCartByIds" parameterType="hashmap">
+        delete from cart
+        <where> user_id = #{userId} and id in
+          <foreach collection="ids" item="item" separator="," open="(" close=")">
+              #{item}
+          </foreach>
+        </where>
+    </delete>
+    <resultMap id="cartMap" type="com.example.spmall.pojo.Cart">
+        <result column="id" property="id"></result>
+        <result column="sku_id" property="skuId"></result>
+        <result column="user_id" property="userId"></result>
+        <result column="create_date" property="createDate"></result>
+        <result column="qty" property="qty"></result>
+    </resultMap>
+</mapper>

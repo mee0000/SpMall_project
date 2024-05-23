@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.spmall.mapper.OrderMapper">
+<!--    void insertDelivery(Delivery delivery);-->
+    <insert id="insertDelivery" parameterType="com.example.spmall.pojo.Delivery">
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            select last_insert_id()
+        </selectKey>
+        insert into delivery (city, street, zipcode, delivery_code)
+        values(#{city}, #{street}, #{zipcode}, #{deliveryCode})
+    </insert>
+<!--    void insertOrder(Orders orders);-->
+    <insert id="insertOrder" parameterType="com.example.spmall.pojo.Orders">
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            select last_insert_id()
+        </selectKey>
+        insert into orders (user_id, order_date, delivery_code)
+        values(#{userId}, #{orderDate}, #{deliveryCode})
+    </insert>
+    <insert id="insertOrderItems" parameterType="list">
+        insert into order_item (order_id, sku_id, order_qty, order_price)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.orderId}, #{item.skuId}, #{item.orderQty}, #{item.orderPrice})
+        </foreach>
+
+    </insert>
+
+</mapper>

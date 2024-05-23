@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.spmall.mapper.PermissionMapper">
+    <select id="getPermissionList" resultType="com.example.spmall.pojo.Permission">
+        with recursive CTE as (
+        select  id, name, code, pid,1 as level, convert(id, char (100)) as path,status,type,updateTime,createTime,checked from permission where pid = 0 union all
+        select p.id, p.name,p.code,p.pid, b.level + 1 , concat(b.path, '-', p.id), p.status,p.type, p.updateTime, p.createTime,p.checked from permission p
+        inner join CTE as b on p.pid = b.id and p.status = 1 and b.status = 1)
+        select id, ifnull(pid, 0) as pid,code, name, level, path,status,type,updateTime,createTime,checked from CTE order by path
+    </select>
+    <insert id="insertPermission" parameterType="com.example.spmall.pojo.Permission">
+        insert into permission (pid, name, code, toCode, type, status,level,checked,createTime,updateTime)
+        values(#{p_id}, #{name}, #{code}, #{toCode}, #{type},#{status}, #{level},#{checked}, #{createTime},#{updateTime})
+    </insert>
+    <insert id="insertRPermission" parameterType="com.example.spmall.pojo.RPermission">
+            insert into r_permission (r_id, p_id, p_name, type, code, level)
+            values(#{r_id}, #{p_id}, #{p_name}, #{type}, #{code}, #{level})
+            on duplicate key update p_name = #{p_name}, type = #{type}, code= #{code}
+    </insert>
+    <select id="getPermissionListByIds" parameterType="list">
+        select id, name, type,code from permission
+          <where> id in
+              <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+                  #{item}
+              </foreach>
+          </where>
+    </select>
+
+    <delete id="deleteRPermission" parameterType="map">
+           delete
+           from r_permission
+           <where>
+               <foreach collection="pIds" index="index" item="item" separator="AND" >
+                   (r_id = #{r_id} and p_id != #{item})
+               </foreach>
+
+           </where>
+    </delete>
+    <update id="updatePermission" parameterType="com.example.spmall.pojo.Permission">
+        update permission set
+            <if test="pid != null and pid != ''">
+                pid = #{pid},
+            </if>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="code != null and code != ''">
+                code = #{code},
+            </if>
+            <if test="toCode != null and toCode != ''">
+                toCode = #{toCode},
+            </if>
+            <if test="type != null and type != ''">
+                type = #{type},
+            </if> <if test="status != null and status != ''">
+                status = #{status},
+            </if>
+            <if test="level != null and level != ''">
+                level = #{level},
+            </if>
+            <if test="checked != null and checked != ''">
+                checked = #{checked},
+            </if>
+             updateTime = #{updateTime}
+             where id = #{id}
+    </update>
+</mapper>

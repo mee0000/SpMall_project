@@ -1,0 +1,1 @@
+import{Q as i}from"./index-7801d67b.js";const n=()=>i.get("/admin/permission/list"),o=s=>i.get(`/admin/permission/toAssign/${s}`),m=(s,e)=>i.post(`/admin/permission/doAssignAcl/${s}`,e),t=s=>s.id?i.put("/admin/permission/savePermission",s):i.post("/admin/permission/addPermission",s),p=s=>i.put("/admin/permission/deletePermission",s);export{m as a,n as b,p as c,t as d,o as r};

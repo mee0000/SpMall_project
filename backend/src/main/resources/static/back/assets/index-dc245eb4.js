@@ -1,0 +1,1 @@
+import{Q as s}from"./index-06005ebc.js";const n=e=>s.post("/admin/sku/saveSKUById",e),d=e=>s.get(`/admin/sku/findSkuBySpuId/${e}`),k=(e,t,a)=>s.get(`/admin/sku/skuInfo/list/${e}/${t}`,{params:a}),S=e=>s.put("/admin/sku/changeSkuStatus",e),o=e=>s.delete(`/admin/sku/deleteSkuById/${e}`);export{S as a,o as b,n as c,d,k as r};

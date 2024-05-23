@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.spmall.mapper.UserMapper">
+    <insert id="insertUser" parameterType="com.example.spmall.pojo.User">
+        insert into user
+             (username,
+              password,
+              createTime,
+              updateTime
+              <if test="desc != null and desc != ''">
+                  ,desc
+              </if>
+              <if test="avatar != null and avatar != ''">
+                ,avatar
+              </if>
+              <if test="nickName != null and nickName != ''">
+                ,nick_name
+              </if>
+             )
+            values (#{username},
+                    SHA2(#{password}, 256),
+                    #{createTime},
+                    #{updateTime}
+                    <if test="desc != null and desc != ''">
+                        ,#{desc}
+                    </if>
+                    <if test="avatar != null and avatar != ''">
+                        ,#{avatar}
+                    </if>
+                    <if test="nickName != null and nickName != ''">
+                        ,#{nickName}
+                    </if>
+               )
+    </insert>
+    <insert id="insertUserRoles" parameterType="com.example.spmall.pojo.Roles">
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            select last_insert_id()
+        </selectKey>
+        insert into user_role (user_id, role_id, role_name) values (#{userId}, #{roleId}, #{roleName})
+    </insert>
+    <update id="updateUser" parameterType="com.example.spmall.pojo.User">
+        update user
+        <set>
+            <if test="username !=null and username != ''">
+                username = #{username},
+            </if>
+            <if test="password !=null and password != ''">
+                password = SHA2(#{password}, 256),
+            </if>
+            <if test="avatar !=null and avatar != ''">
+                avatar = #{avatar},
+            </if>
+            <if test="nickName !=null and nickName != ''">
+                nick_name = #{nickName},
+            </if>
+                updateTime = #{updateTime}
+        </set>
+        where id = #{id}
+    </update>
+    <!--userInfo 상세정보 가져오기-->
+    <select id="getUserInfo" resultMap="userMap">
+        select u.id, u.username,u.desc, u.avatar, u.nick_name
+        from user u
+        where u.username = #{username}
+    </select>
+    <select id="getUserRoleList" resultType="com.example.spmall.pojo.UserRole" parameterType="int">
+        select id, user_id, role_id, role_name
+        from user_role
+        where user_id = #{id}
+    </select>
+    <select id="getUserButtonList" resultType="string" parameterType="int">
+        select a.code
+        from (
+            select u.role_id, r.p_name as btn_name,r.code, u.user_id
+            from r_permission as r join user_role as u on u.role_id = r.r_id and type = 2) as a
+         where a.user_id = #{id}
+    </select>
+    <select id="getUserRouteList" resultType="string" parameterType="int">
+        select a.code
+        from (
+            select u.role_id, r.p_name as route_name,r.code, u.user_id
+            from r_permission as r join user_role as u on u.role_id = r.r_id and type = 1) as a
+        where a.user_id = #{id}
+    </select>
+    <select id="getUserList" parameterType="string" resultMap="userMap">
+        select *
+        from user
+        <where>
+            <if test="keyword != null and keyword != ''">
+                username like concat('%', #{keyword}, '%')
+            </if>
+        </where>
+    </select>
+    <delete id="deleteUserRoles" parameterType="list">
+        delete from user_role
+        <where>
+            <foreach collection="list" item="item" separator="AND">
+                (user_id = #{item.userId} and role_id != #{item.roleId})
+            </foreach>
+        </where>
+    </delete>
+    <delete id="deleteUsers" parameterType="list">
+        delete from user
+        where
+            id in
+            <foreach collection="list" item="item" index="i" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+
+    </delete>
+    <select id="getAllRoles" parameterType="string">
+         select id, name, create_time, update_time
+         from roles
+          <where>
+              <if test="keyword != null and keyword !=''">
+                  name like concat('%', #{keyword},'%')
+              </if>
+          </where>
+    </select>
+    <resultMap id="userMap" type="com.example.spmall.pojo.User" >
+        <result column="id" property="id"></result>
+        <result column="username" property="username"></result>
+        <result column="password" property="password"></result>
+        <result column="avatar" property="avatar"></result>
+        <result column="desc" property="desc"></result>
+        <result column="createTime" property="createTime"></result>
+        <result column="updateTime" property="updateTime"></result>
+        <result column="nick_name" property="nickName"></result>
+        <collection property="roles" ofType="com.example.spmall.pojo.UserRole" column="id" select="getUserRoleList"></collection>
+        <collection property="buttons" ofType="com.example.spmall.pojo.UserButton" column="id" select="getUserButtonList"></collection>
+        <collection property="routes" ofType="com.example.spmall.pojo.UserRoute" column="id" select="getUserRouteList"></collection>
+    </resultMap>
+</mapper>

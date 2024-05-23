@@ -1,0 +1,18 @@
+// 项目提供scss全局变量 ==> vite.config.ts ==> css추가
+$color: red;
+
+// 좌측메뉴 사이즈
+$base-menu-width: 260px;
+// 좌측메뉴 최소 사이즈
+$base-menu-min-width: 50px;
+// 좌측메뉴 백그라운드 컬러
+$base-menu-background: #001529;
+
+// 상단네비게이션 
+$base-tabbar-height: 50px;
+
+//좌측메뉴logo height
+$base-menu-logo-height: 50px;
+
+//좌측메뉴logo우측폰트사이즈
+$base-logo-title-fontSize: 20px;
