@@ -5,6 +5,7 @@
    <div>
 	   <h3 >⏰ 개발기간</h3><hr/>
 	   <h4>2023.7~ 2024.5</h4>
+	 
    </div>
   <h3>✨ Tech Stack ✨</h3><hr/>
   <div align="center" >	  
@@ -29,14 +30,21 @@
   <div align="center">
     <img src="https://img.shields.io/badge/adobe%20photoshop-08253c.svg?style=for-the-badge&logo=adobe%20photoshop&logoColor=37abff" />&nbsp
     <img src="https://img.shields.io/badge/IntelliJIDEA-000000.svg?style=for-the-badge&logo=intellij-idea&logoColor=white" />&nbsp
-  </div
-	  <div>
-		  <h3>🖥️ 기획및 설계</h3><hr/>
-		  <ul>
+  </div>
+    <div>
+         <h3>🖥️ 기획및 설계</h3><hr/>
+	     <ul>
 			  <li>프로젝트 칸반보드</li>
-
 			  <li>기능 명세서</li>
 			  <li>페이지 기획서</li>
-		  </ul>
-	  </div>
-
+	   </ul>
+      <img width="982" alt="img" src="https://github.com/mee0000/SpMall_project/assets/150937167/5d22b259-c3bc-49e5-8e67-3d0e61416925">
+   
+   </div>
+   <div>
+	     <ul>
+			  <li>API설계</li>
+			  <li>DB 명세서</li>
+	   </ul>  
+   </div>
+    <img src="https://github.com/mee0000/SpMall_project/assets/150937167/24c95dfd-14c4-410f-8809-e95e4329da5d"/>
