@@ -1,5 +1,6 @@
 <div align="center">
 	<img src="https://capsule-render.vercel.app/api?type=cylinder&color=auto&text=MY%20ShoppingMall&fontAlignY=45&fontSize=40&height=150&animation=blinking&desc=uno984&descAlignY=70">
+	<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=mee0000&layout=compact">
   <h3 align="center">✨ Tech Stack ✨</h3>
   <img src="https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white"/>
   <img src="https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white"/>
